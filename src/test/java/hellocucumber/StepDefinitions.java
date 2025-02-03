@@ -14,11 +14,14 @@ import java.io.ByteArrayOutputStream;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.StringReader;
+import java.lang.Iterable;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.parsers.DocumentBuilder;
+import javax.xml.transform.Source;
+
 import org.w3c.dom.*;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -34,6 +37,10 @@ import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 
 import static org.junit.jupiter.api.Assertions.*;
+
+import org.xmlunit.builder.DiffBuilder;
+import org.xmlunit.builder.Input;
+import org.xmlunit.diff.*;
 
 public class StepDefinitions {
 
@@ -117,8 +124,57 @@ public class StepDefinitions {
 
     @Then("response data should be {string}")
     public void CompareResponseDataToFile(String string) throws javax.xml.parsers.ParserConfigurationException, java.io.IOException, org.xml.sax.SAXException, XPathExpressionException {
+
+        ByteArrayInputStream is = new ByteArrayInputStream(m_responseBytes);
+        Document responseDoc = m_builder.parse(is);
+
         File xmlFile = new File("src/test/resources/hellocucumber/" + string);
-        m_doc = m_builder.parse(xmlFile);
+        Document response = m_builder.parse(xmlFile);
+        // DifferenceEngine diff = new DOMDifferenceEngine();
+
+        // boolean diffFound = true;
+
+        // diff.addDifferenceListener(new ComparisonListener() {
+        //     public void comparisonPerformed(Comparison comparison, ComparisonResult outcome) {
+        //         outcome.
+        //     }
+        // });
+
+        // Source control = Input.fromDocument(m_doc).build();
+        // Source test = Input.fromDocument(response).build();
+        // diff.compare(control, test);
+
+        Diff diff = DiffBuilder.compare(Input.fromDocument(responseDoc)).withTest(response).build();
+
+        Iterable<Difference> it = diff.getDifferences();
+
+        // System.out.println(it.toString());
+
+        while( it.iterator().hasNext() )
+        {
+            Difference d = it.iterator().next();
+
+            ComparisonResult cr = d.getResult();
+
+            if( cr == ComparisonResult.SIMILAR )
+            {
+                System.out.println(d.toString());
+            }
+            else if( cr == ComparisonResult.DIFFERENT )
+            {                
+                System.out.println(d.toString());
+                fail("xml DOES NOT match.");
+            }
+            else if( cr == ComparisonResult.EQUAL )
+            {
+                System.out.println(d.toString());
+            }
+        }
+
+        // if( diff.hasDifferences() )
+        // {
+        // }
+
     }
 
     private String CallScheduler() throws java.io.IOException, TransformerException {
