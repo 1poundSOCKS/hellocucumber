@@ -117,6 +117,8 @@ public class StepDefinitions {
 
     @Then("response data should be {string}")
     public void CompareResponseDataToFile(String string) throws javax.xml.parsers.ParserConfigurationException, java.io.IOException, org.xml.sax.SAXException, XPathExpressionException {
+        File xmlFile = new File("src/test/resources/hellocucumber/" + string);
+        m_doc = m_builder.parse(xmlFile);
     }
 
     private String CallScheduler() throws java.io.IOException, TransformerException {
@@ -132,7 +134,7 @@ public class StepDefinitions {
         URL url = new URL("http://localhost:9542");
         URLConnection con = url.openConnection();
         HttpURLConnection http = (HttpURLConnection) con;
-        http.setRequestMethod("POST"); // PUT is another valid option
+        http.setRequestMethod("POST");
         http.setDoOutput(true);
         http.setDoInput(true);
         con.setRequestProperty("Content-Length", String.valueOf(b.length));
