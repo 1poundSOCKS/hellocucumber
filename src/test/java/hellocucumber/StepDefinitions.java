@@ -2,7 +2,6 @@ package hellocucumber;
 
 import io.cucumber.java.en.*;
 
-import java.io.DataInputStream;
 import java.net.HttpURLConnection;
 import java.net.URLConnection;
 import java.net.URL;
@@ -10,19 +9,14 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.io.ByteArrayOutputStream;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.io.StringReader;
-import java.lang.Iterable;
 import java.util.Iterator;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.parsers.DocumentBuilder;
-import javax.xml.transform.Source;
 
 import org.w3c.dom.*;
 import org.xml.sax.InputSource;
@@ -81,8 +75,8 @@ public class StepDefinitions {
         m_doc = m_builder.parse(xmlFile);
     }
     
-    @When("GetJob is called")
-    public void CallGetJob() throws SAXException, IOException {
+    @When("APIAgent is called")
+    public void CallAPIAgent() throws SAXException, IOException {
 
         try {
             m_response = CallScheduler();
@@ -124,6 +118,10 @@ public class StepDefinitions {
         }
     }
 
+    @Then("return code can be a warning")
+    public void return_code_can_be_a_warning() {
+    }
+
     @Then("response data should be {string}")
     public void CompareResponseDataToFile(String string) throws javax.xml.parsers.ParserConfigurationException, java.io.IOException, org.xml.sax.SAXException, XPathExpressionException {
 
@@ -145,16 +143,14 @@ public class StepDefinitions {
 
             if( cr == ComparisonResult.SIMILAR )
             {
-                // System.out.println(d.toString());
             }
             else if( cr == ComparisonResult.DIFFERENT )
-            {                
-                System.out.println(d.toString());
+            {
+                System.err.println(d.toString());
                 fail("xml DOES NOT match.");
             }
             else if( cr == ComparisonResult.EQUAL )
             {
-                // System.out.println(d.toString());
             }
         }
     }
