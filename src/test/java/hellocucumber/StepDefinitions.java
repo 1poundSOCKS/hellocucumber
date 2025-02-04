@@ -8,6 +8,7 @@ import java.net.URLConnection;
 import java.net.URL;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.io.ByteArrayOutputStream;
@@ -15,6 +16,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.lang.Iterable;
+import java.util.Iterator;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.dom.DOMSource;
@@ -130,35 +132,20 @@ public class StepDefinitions {
 
         File xmlFile = new File("src/test/resources/hellocucumber/" + string);
         Document response = m_builder.parse(xmlFile);
-        // DifferenceEngine diff = new DOMDifferenceEngine();
 
-        // boolean diffFound = true;
+        Diff diff = DiffBuilder.compare(Input.fromDocument(responseDoc)).withTest(response).ignoreWhitespace().build();
 
-        // diff.addDifferenceListener(new ComparisonListener() {
-        //     public void comparisonPerformed(Comparison comparison, ComparisonResult outcome) {
-        //         outcome.
-        //     }
-        // });
+        Iterator<Difference> i = diff.getDifferences().iterator();
 
-        // Source control = Input.fromDocument(m_doc).build();
-        // Source test = Input.fromDocument(response).build();
-        // diff.compare(control, test);
-
-        Diff diff = DiffBuilder.compare(Input.fromDocument(responseDoc)).withTest(response).build();
-
-        Iterable<Difference> it = diff.getDifferences();
-
-        // System.out.println(it.toString());
-
-        while( it.iterator().hasNext() )
+        while( i.hasNext() )
         {
-            Difference d = it.iterator().next();
+            Difference d = i.next();
 
             ComparisonResult cr = d.getResult();
 
             if( cr == ComparisonResult.SIMILAR )
             {
-                System.out.println(d.toString());
+                // System.out.println(d.toString());
             }
             else if( cr == ComparisonResult.DIFFERENT )
             {                
@@ -167,14 +154,9 @@ public class StepDefinitions {
             }
             else if( cr == ComparisonResult.EQUAL )
             {
-                System.out.println(d.toString());
+                // System.out.println(d.toString());
             }
         }
-
-        // if( diff.hasDifferences() )
-        // {
-        // }
-
     }
 
     private String CallScheduler() throws java.io.IOException, TransformerException {
@@ -203,6 +185,12 @@ public class StepDefinitions {
 
         // read response
         m_responseBytes = readAllBytes((http.getInputStream()));
+
+        // log response
+        FileOutputStream outputStream = new FileOutputStream("log/response.xml");
+        outputStream.write(m_responseBytes);
+        outputStream.close();
+
         return m_responseBytes.toString();
     }
 
